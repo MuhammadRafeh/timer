@@ -14,7 +14,7 @@ import {
 
 const screen = Dimensions.get('window');
 
-formatTime = (time) => `0${time}`.slice(-2); //Adds 0 when it's single for minutes and seconds both
+const formatTime = (time) => `0${time}`.slice(-2); //Adds 0 when it's single for minutes and seconds both
 
 const getRemaining = (time) => {
   const minutes = Math.floor(time / 60);
@@ -33,23 +33,19 @@ const createArray = (length) => {
   return arr;
 };
 
-const AVAILABLE_MINUTES = createArray(10);
+const AVAILABLE_MINUTES = createArray(60);
 const AVAILABLE_SECONDS = createArray(60);
 
 class App extends React.Component {
   state = {
-    minutes: 2,
+    minutes: 4,
     seconds: 2,
     leftTime: 50,
     isRunning: false,
   };
 
   start = () => {
-    var hms = `${this.state.minutes}:${this.state.seconds}`; // your input string
-    var a = hms.split(':'); // split it at the colons
-
-    // minutes are worth 60 seconds. Hours are worth 60 minutes.
-    var seconds = +a[0] * 60 + +a[1];
+    var seconds = +this.state.minutes * 60 + +this.state.seconds;
     this.setState((prevState) => ({
       leftTime: seconds,
       isRunning: true,
