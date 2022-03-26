@@ -7,23 +7,22 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
-  Picker
+  Picker,
 } from 'react-native';
-
 
 // import Picker from '@react-native-community/picker'
 
-const screen = Dimensions.get('window')
+const screen = Dimensions.get('window');
 
-formatTime = time => `0${time}`.slice(-2) //Adds 0 when it's single for minutes and seconds both
+formatTime = (time) => `0${time}`.slice(-2); //Adds 0 when it's single for minutes and seconds both
 
-const getRemaining = time => {
-  const minutes = Math.floor(time / 60)
-  const seconds = time - minutes * 60
-  return { minutes: formatTime(minutes), seconds: formatTime(seconds) }
-}
+const getRemaining = (time) => {
+  const minutes = Math.floor(time / 60);
+  const seconds = time - minutes * 60;
+  return { minutes: formatTime(minutes), seconds: formatTime(seconds) };
+};
 
-const createArray = length => {
+const createArray = (length) => {
   const arr = [];
   let i = 0;
   while (i < length) {
@@ -39,56 +38,62 @@ const AVAILABLE_SECONDS = createArray(60);
 
 class App extends React.Component {
   state = {
-    leftTime: 5,
-    isRunning: false
-  }
+    minutes: 2,
+    seconds: 2,
+    leftTime: 50,
+    isRunning: false,
+  };
 
   start = () => {
-      this.setState(prevState => ({
-        leftTime: prevState.leftTime - 1,
-        isRunning: true
-      }))
+    var hms = `${this.state.minutes}:${this.state.seconds}`; // your input string
+    var a = hms.split(':'); // split it at the colons
 
-      this.interval = setInterval(() => {
-        this.setState(prevState => ({
-          leftTime: prevState.leftTime - 1
-        }))
-      }, 1000)
-  }
+    // minutes are worth 60 seconds. Hours are worth 60 minutes.
+    var seconds = +a[0] * 60 + +a[1];
+    this.setState((prevState) => ({
+      leftTime: seconds,
+      isRunning: true,
+    }));
+
+    this.interval = setInterval(() => {
+      this.setState((prevState) => ({
+        leftTime: prevState.leftTime - 1,
+      }));
+    }, 1000);
+  };
 
   componentWillUnmount() {
-    clearInterval(this.interval)
+    clearInterval(this.interval);
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.leftTime === 0) {
       this.setState({
         isRunning: false,
-        leftTime: 5
-      })
-      clearInterval(this.interval)
-      this.interval = null
+        leftTime: 5,
+      });
+      clearInterval(this.interval);
+      this.interval = null;
     }
   }
 
   stop = () => {
-    clearInterval(this.interval)
-    this.interval = null
-    this.setState({isRunning: false, leftTime: 5})
-  }
+    clearInterval(this.interval);
+    this.interval = null;
+    this.setState({ isRunning: false });
+  };
 
   renderPicker = () => (
     <View style={styles.pickerContainer}>
       <Picker
         style={styles.picker}
         itemStyle={styles.pickerItem}
-        selectedValue="2"
-        onValueChange={itemValue => {
-          // todo
+        selectedValue={this.state.minutes}
+        onValueChange={(itemValue) => {
+          this.setState({ minutes: parseInt(itemValue) });
         }}
-        mode="dropdown"
-      >
-        {AVAILABLE_MINUTES.map(value => (
+        mode="dropdown">
+        {AVAILABLE_MINUTES.map((value) => (
           <Picker.Item key={value} label={value} value={value} />
         ))}
       </Picker>
@@ -96,62 +101,56 @@ class App extends React.Component {
       <Picker
         style={styles.picker}
         itemStyle={styles.pickerItem}
-        selectedValue="2"
-        onValueChange={itemValue => {
-          // todo
+        selectedValue={this.state.seconds}
+        onValueChange={(itemValue) => {
+          this.setState({ seconds: parseInt(itemValue) });
         }}
-        mode="dropdown"
-      >
-        {AVAILABLE_SECONDS.map(value => (
+        mode="dropdown">
+        {AVAILABLE_SECONDS.map((value) => (
           <Picker.Item key={value} label={value} value={value} />
         ))}
       </Picker>
       <Text style={styles.pickerItem}>seconds</Text>
     </View>
-  )
+  );
 
   render() {
+    const { minutes, seconds } = getRemaining(this.state.leftTime);
 
-    const {minutes, seconds} = getRemaining(this.state.leftTime)
-
-    return(
+    return (
       <View style={styles.container}>
-        <StatusBar barStyle="light-content"/>
-        { this.state.isRunning ? 
-          (<Text style={styles.timerText}>{`${minutes}:${seconds}`}</Text>) :
-          (this.renderPicker()) 
-        }
-        { this.state.isRunning ? 
-          (<TouchableOpacity 
+        <StatusBar barStyle="light-content" />
+        {this.state.isRunning ? (
+          <Text style={styles.timerText}>{`${minutes}:${seconds}`}</Text>
+        ) : (
+          this.renderPicker()
+        )}
+        {this.state.isRunning ? (
+          <TouchableOpacity
             style={[styles.button, styles.stopButton]}
-            onPress={this.stop}
-          >
-            <Text style={[styles.buttonText, styles.stopButtonText]}>
-              Stop
-            </Text>
-          </TouchableOpacity>) :
-          (<TouchableOpacity
+            onPress={this.stop}>
+            <Text style={[styles.buttonText, styles.stopButtonText]}>Stop</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
             style={[styles.button, styles.startButton]}
-            onPress={this.start}
-          >
-            <Text style={styles.buttonText}>
-              Start
-            </Text>
-          </TouchableOpacity>)
-        }
+            onPress={this.start}>
+            <Text style={styles.buttonText}>Start</Text>
+          </TouchableOpacity>
+        )}
       </View>
-    )
+    );
   }
 }
 
-export default App
+export default App;
 
 styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'black'
+    backgroundColor: 'black',
   },
   button: {
     borderWidth: 10,
@@ -160,25 +159,25 @@ styles = StyleSheet.create({
     borderRadius: screen.width / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 30
+    marginTop: 30,
   },
   startButton: {
-    borderColor: 'blue'
+    borderColor: 'blue',
   },
   buttonText: {
     fontSize: 50,
     fontWeight: 'bold',
-    color: 'blue'
+    color: 'blue',
   },
   stopButton: {
-    borderColor: 'orange'
+    borderColor: 'orange',
   },
   stopButtonText: {
-    color: 'orange'
+    color: 'orange',
   },
   timerText: {
     fontSize: 90,
-    color: '#fff'
+    color: '#fff',
   },
   picker: {
     width: 50,
@@ -198,4 +197,4 @@ styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-})
+});
